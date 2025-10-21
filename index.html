@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>川韵渡红魂 - 川剧与苍溪红色文化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'chinese-red': '#9E1F36',
+                        'chinese-gold': '#D4AF37',
+                        'chinese-black': '#121212',
+                        'deep-blue': '#1A365D',
+                        'ink-green': '#234732',
+                        'dark-purple': '#3F2B5A'
+                    },
+                    fontFamily: {
+                        song: ['"Noto Serif SC"', 'serif'],
+                        kai: ['"Noto Serif SC"', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .scroll-reveal {
+                opacity: 0;
+                transform: translateY(30px);
+                transition: opacity 0.8s ease, transform 0.8s ease;
+            }
+            .scroll-reveal.active {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            .curtain-container {
+                position: relative;
+                overflow: hidden;
+                height: 100vh;
+                background-color: chinese-black;
+                background-size: cover;
+                background-position: center;
+            }
+            .curtain-left, .curtain-right {
+                position: absolute;
+                top: 0;
+                height: 100%;
+                width: 50%;
+                background-color: chinese-black;
+                background-size: cover;
+                background-position: center;
+                transition: transform 2s ease-in-out;
+                z-index: 10;
+            }
+            .curtain-left {
+                left: 0;
+                background-image: url('images/左.png');
+                transform-origin: left;
+            }
+            .curtain-right {
+                right: 0;
+                background-image: url('images/右.png');
+                transform-origin: right;
+            }
+            .curtain-open .curtain-left {
+                transform: rotateY(-90deg);
+            }
+            .curtain-open .curtain-right {
+                transform: rotateY(90deg);
+            }
+            .sleeve-animation {
+                position: absolute;
+                background-image: url('images/中.png');
+                background-size: contain;
+                background-repeat: no-repeat;
+                width: 150px;
+                height: 300px;
+                opacity: 0.7;
+                z-index: -1;
+                animation: sleeve-wave 8s infinite ease-in-out;
+            }
+            @keyframes sleeve-wave {
+                0%, 100% { transform: translateX(0) rotate(5deg); }
+                50% { transform: translateX(30px) rotate(-5deg); }
+            }
+            .mask-hover {
+                transition: transform 0.5s ease;
+            }
+            .mask-hover:hover {
+                transform: scale(1.1) rotate(5deg);
+            }
+            .scroll-box {
+                position: relative;
+                overflow: hidden;
+                background-image: url('');
+                background-size: cover;
+                border: 10px solid #D4AF37;
+                border-radius: 5px;
+            }
+            .scroll-content {
+                max-height: 0;
+                opacity: 0;
+                transition: max-height 1.5s ease, opacity 1s ease 0.3s;
+            }
+            .scroll-expanded .scroll-content {
+                max-height: 1500px;
+                opacity: 1;
+            }
+            /* 购物车样式 */
+            .cart-sidebar {
+                position: fixed;
+                top: 0;
+                right: -400px;
+                width: 380px;
+                height: 100vh;
+                background-color: #121212;
+                border-left: 2px solid #D4AF37;
+                z-index: 100;
+                transition: right 0.3s ease;
+                overflow-y: auto;
+            }
+            .cart-open .cart-sidebar {
+                right: 0;
+            }
+            .cart-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                background-color: rgba(0,0,0,0.7);
+                z-index: 99;
+                display: none;
+            }
+            .cart-open .cart-overlay {
+                display: block;
+            }
+            .quantity-btn {
+                width: 24px;
+                height: 24px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #D4AF37;
+                background: transparent;
+                color: #D4AF37;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .quantity-btn:hover {
+                background-color: #D4AF37;
+                color: #121212;
+            }
+            .add-to-cart-btn {
+                transition: all 0.3s;
+            }
+            .add-to-cart-btn:hover {
+                background-color: #D4AF37;
+                color: #121212;
+                transform: translateY(-2px);
+            }
+            .checkout-modal {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) scale(0.8);
+                width: 90%;
+                max-width: 500px;
+                background-color: #121212;
+                border: 2px solid #D4AF37;
+                border-radius: 8px;
+                z-index: 101;
+                padding: 20px;
+                display: none;
+            }
+            .checkout-modal.active {
+                display: block;
+                transform: translate(-50%, -50%) scale(1);
+                transition: transform 0.3s;
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body class="bg-chinese-black text-white font-song" id="body">
+    <!-- 导航栏 -->
+    <nav id="navbar" class="fixed w-full z-50 transition-all duration-300 bg-chinese-black/80">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="text-chinese-gold text-2xl md:text-3xl font-kai font-bold">川韵渡红魂</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#origin" class="hover:text-chinese-gold transition-colors duration-300 relative group">
+                    设计初衷
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-chinese-gold transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#opera" class="hover:text-chinese-gold transition-colors duration-300 relative group">
+                    川剧艺术
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-chinese-gold transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#culture" class="hover:text-chinese-gold transition-colors duration-300 relative group">
+                    苍溪红魂
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-chinese-gold transition-all duration-300 group-hover:w-full"></span>
+                </a>
+                <a href="#products" class="hover:text-chinese-gold transition-colors duration-300 relative group">
+                    文创产品
+                    <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-chinese-gold transition-all duration-300 group-hover:w-full"></span>
+                </a>
+            </div>
+            <!-- 购物车按钮 -->
+            <button id="cart-btn" class="text-chinese-gold text-xl relative mr-4">
+                <i class="fa fa-shopping-cart"></i>
+                <span id="cart-count" class="absolute -top-2 -right-2 bg-chinese-red text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">0</span>
+            </button>
+            <button class="md:hidden text-chinese-gold text-2xl" id="menu-toggle">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-chinese-black/95">
+            <div class="container mx-auto px-4 py-3 flex flex-col space-y-4">
+                <a href="#origin" class="hover:text-chinese-gold transition-colors duration-300 py-2">设计初衷</a>
+                <a href="#opera" class="hover:text-chinese-gold transition-colors duration-300 py-2">川剧艺术</a>
+                <a href="#culture" class="hover:text-chinese-gold transition-colors duration-300 py-2">苍溪红魂</a>
+                <a href="#products" class="hover:text-chinese-gold transition-colors duration-300 py-2">文创产品</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 购物车侧边栏 -->
+    <div class="cart-sidebar">
+        <div class="p-6 border-b border-chinese-gold/30">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-2xl font-kai text-chinese-gold">购物车</h3>
+                <button id="close-cart" class="text-white hover:text-chinese-gold">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <p id="cart-empty" class="text-center py-8">购物车为空</p>
+        </div>
+        
+        <div id="cart-items" class="p-4 space-y-4">
+            <!-- 购物车商品将通过JS动态添加 -->
+        </div>
+        
+        <div class="p-6 border-t border-chinese-gold/30 absolute bottom-0 w-full bg-chinese-black">
+            <div class="flex justify-between mb-4">
+                <span class="text-lg">总计：</span>
+                <span id="cart-total" class="text-xl text-chinese-gold font-bold">¥0.00</span>
+            </div>
+            <button id="checkout-btn" class="w-full bg-chinese-red hover:bg-chinese-red/80 text-white py-3 rounded-md transition-all duration-300 flex items-center justify-center">
+                <i class="fa fa-check mr-2"></i> 结算
+            </button>
+        </div>
+    </div>
+    <div class="cart-overlay" id="cart-overlay"></div>
+
+    <!-- 结算弹窗 -->
+    <div class="checkout-modal" id="checkout-modal">
+        <h3 class="text-2xl font-kai text-chinese-gold mb-4 text-center">订单确认</h3>
+        <div id="order-summary" class="mb-6 space-y-2 max-h-40 overflow-y-auto">
+            <!-- 订单摘要将通过JS动态添加 -->
+        </div>
+        <div class="mb-4 flex justify-between">
+            <span class="text-lg">订单总额：</span>
+            <span id="order-total" class="text-xl text-chinese-gold font-bold">¥0.00</span>
+        </div>
+        <div class="flex space-x-4">
+            <button id="cancel-checkout" class="flex-1 bg-transparent border border-chinese-gold text-chinese-gold py-2 rounded-md hover:bg-chinese-gold/10 transition-all">
+                取消
+            </button>
+            <button id="confirm-checkout" class="flex-1 bg-chinese-red hover:bg-chinese-red/80 text-white py-2 rounded-md transition-all">
+                确认支付
+            </button>
+        </div>
+    </div>
+
+    <!-- 首页帷幕效果 -->
+    <header class="curtain-container" id="curtain">
+        <div class="curtain-left"></div>
+        <div class="curtain-right"></div>
+        <div class="absolute inset-0 flex items-center justify-center z-11">
+            <div class="text-center">
+                <h1 class="text-5xl md:text-7xl font-kai font-bold text-chinese-gold mb-6 drop-shadow-lg">川韵渡红魂</h1>
+                <p class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto">川剧艺术与苍溪红色文化的交融</p>
+                <button id="open-curtain" class="mt-8 bg-chinese-red hover:bg-chinese-red/80 text-white px-8 py-3 rounded-md transition-all duration-300 transform hover:scale-105">
+                    开启探索 <i class="fa fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sleeve-animation top-20 left-10" style="animation-delay: 0s;"></div>
+        <div class="sleeve-animation bottom-20 right-10" style="animation-delay: 2s; transform: scaleX(-1);"></div>
+    </header>
+
+    <main class="container mx-auto px-4 py-16">
+        <!-- 设计初衷 -->
+        <section id="origin" class="mb-24">
+            <div class="text-center mb-12 scroll-reveal">
+                <h2 class="text-4xl font-kai font-bold text-chinese-gold mb-4">设计初衷</h2>
+                <div class="w-32 h-1 bg-chinese-red mx-auto"></div>
+            </div>
+            <div class="flex flex-col md:flex-row items-center gap-10 scroll-reveal">
+                <div class="md:w-1/2">
+                    <img src="images/c0150b2e57c98688b67a07caa61d4360.png" alt="苍溪红色文化" class="rounded-lg shadow-xl w-full h-auto">
+                </div>
+                <div class="md:w-1/2 text-lg leading-relaxed">
+                    <p class="mb-6">苍溪，这片位于四川广元的红色土地，承载着深厚的革命历史与红色精神。在中国工农红军长征途中，这里曾发生过无数可歌可泣的英雄事迹。</p>
+                    <p>川剧作为四川文化的瑰宝，以其独特的艺术魅力传承着巴蜀文化的精髓。我们希望通过川剧这一传统艺术形式，架起一座连接古今的桥梁，让更多人透过川剧的"韵"，感受苍溪的"红魂"，传承红色基因，弘扬革命精神。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 川剧艺术 -->
+        <section id="opera" class="mb-24">
+            <div class="text-center mb-12 scroll-reveal">
+                <h2 class="text-4xl font-kai font-bold text-chinese-gold mb-4">川剧艺术</h2>
+                <div class="w-32 h-1 bg-chinese-red mx-auto"></div>
+            </div>
+
+            <!-- 川剧脸谱 -->
+            <div class="mb-16 scroll-reveal">
+                <h3 class="text-2xl font-kai text-chinese-gold mb-8 text-center">脸谱艺术</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div class="mask-hover text-center">
+                        <img src="images/791F3B191E18904E543000A9C0725F25.png" alt="川剧脸谱-红脸" class="rounded-lg shadow-lg mx-auto mb-3 w-48 h-48 object-cover border-2 border-chinese-gold/50">
+                        <p class="text-chinese-gold">红脸 - 忠勇</p>
+                        <p class="text-sm text-white/70 mt-1">代表人物：关羽，象征忠诚勇敢</p>
+                    </div>
+                    <div class="mask-hover text-center">
+                        <img src="images/F91B96C08EB6A713F884E2CF091272CA.png" alt="川剧脸谱-黑脸" class="rounded-lg shadow-lg mx-auto mb-3 w-48 h-48 object-cover border-2 border-chinese-gold/50">
+                        <p class="text-chinese-gold">黑脸 - 刚直</p>
+                        <p class="text-sm text-white/70 mt-1">代表人物：包拯，象征刚正不阿</p>
+                    </div>
+                    <div class="mask-hover text-center">
+                        <img src="images/4079af8c1abe2cbc318f76623fba005b.png" alt="川剧脸谱-白脸" class="rounded-lg shadow-lg mx-auto mb-3 w-48 h-48 object-cover border-2 border-chinese-gold/50">
+                        <p class="text-chinese-gold">白脸 - 奸猾</p>
+                        <p class="text-sm text-white/70 mt-1">代表人物：曹操，象征阴险狡诈</p>
+                    </div>
+                    <div class="mask-hover text-center">
+                        <img src="images/AF16013C754DD1675998209D372DBB7E.png" alt="川剧脸谱-花脸" class="rounded-lg shadow-lg mx-auto mb-3 w-48 h-48 object-cover border-2 border-chinese-gold/50">
+                        <p class="text-chinese-gold">花脸 - 神怪</p>
+                        <p class="text-sm text-white/70 mt-1">代表人物：孙悟空，象征神通广大</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 经典剧目 卷轴效果 -->
+            <div class="scroll-box mb-16 scroll-reveal">
+                <div class="text-center p-4">
+                    <h3 class="text-2xl font-kai text-chinese-gold cursor-pointer" id="scroll-trigger1">经典剧目 <i class="fa fa-chevron-down ml-2 transition-transform duration-300"></i></h3>
+                </div>
+                <div class="scroll-content p-6 md:p-10" id="scroll-content1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-chinese-black/50 p-6 rounded-lg border border-deep-blue/30">
+                            <h4 class="text-xl text-chinese-gold mb-3">《巴山秀才》</h4>
+                            <p>讲述了清末巴山秀才孟登科为民请命，与贪官污吏进行斗争的故事，反映了人民群众的反抗精神。</p>
+                        </div>
+                        <div class="bg-chinese-black/50 p-6 rounded-lg border border-ink-green/30">
+                            <h4 class="text-xl text-chinese-gold mb-3">《金子》</h4>
+                            <p>改编自曹禺先生的《原野》，通过川剧独特的表现手法，展现了人性的复杂与对自由的追求。</p>
+                        </div>
+                        <div class="bg-chinese-black/50 p-6 rounded-lg border border-dark-purple/30">
+                            <h4 class="text-xl text-chinese-gold mb-3">《夫妻观灯》</h4>
+                            <p>传统喜剧，通过一对夫妻观看花灯的过程，展现了四川民间的生活情趣和节日氛围。</p>
+                        </div>
+                        <div class="bg-chinese-black/50 p-6 rounded-lg border border-chinese-red/30">
+                            <h4 class="text-xl text-chinese-gold mb-3">《苍溪烽火》</h4>
+                            <p>新编现代川剧，讲述了苍溪人民在红军长征时期支援革命、英勇斗争的红色故事。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 表演成分 卷轴效果 -->
+            <div class="scroll-box scroll-reveal">
+                <div class="text-center p-4">
+                    <h3 class="text-2xl font-kai text-chinese-gold cursor-pointer" id="scroll-trigger2">表演成分 <i class="fa fa-chevron-down ml-2 transition-transform duration-300"></i></h3>
+                </div>
+                <div class="scroll-content p-6 md:p-10" id="scroll-content2">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-chinese-black/50 p-6 rounded-lg text-center border border-chinese-gold/20">
+                            <div class="text-chinese-gold text-4xl mb-4"><i class="fa fa-magic"></i></div>
+                            <h4 class="text-xl text-chinese-gold mb-3">变脸</h4>
+                            <p>川剧最具代表性的绝技之一，演员在瞬间变换脸谱，展现角色内心变化，神秘莫测。</p>
+                        </div>
+                        <div class="bg-chinese-black/50 p-6 rounded-lg text-center border border-chinese-gold/20">
+                            <div class="text-chinese-gold text-4xl mb-4"><i class="fa fa-fire"></i></div>
+                            <h4 class="text-xl text-chinese-gold mb-3">喷火</h4>
+                            <p>演员从口中喷出火焰，多用于表现鬼怪、妖魔的凶猛，场面壮观，极具视觉冲击力。</p>
+                        </div>
+                        <div class="bg-chinese-black/50 p-6 rounded-lg text-center border border-chinese-gold/20">
+                            <div class="text-chinese-gold text-4xl mb-4"><i class="fa fa-music"></i></div>
+                            <h4 class="text-xl text-chinese-gold mb-3">唱腔</h4>
+                            <p>川剧唱腔委婉动听，分为高腔、昆腔、胡琴、弹戏、灯调五种，各具特色。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 苍溪红魂 -->
+        <section id="culture" class="mb-24">
+            <div class="text-center mb-12 scroll-reveal">
+                <h2 class="text-4xl font-kai font-bold text-chinese-gold mb-4">苍溪红魂</h2>
+                <div class="w-32 h-1 bg-chinese-red mx-auto"></div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 scroll-reveal">
+                <div class="bg-gradient-to-b from-deep-blue/30 to-chinese-black p-6 rounded-lg shadow-lg transform transition-transform hover:-translate-y-2 duration-300">
+                    <img src="images/a8227a71d93d3bc6c2e322e89a76c125.png" alt="苍溪红军渡" class="w-full h-48 object-cover rounded mb-4 border-2 border-chinese-gold/30">
+                    <h3 class="text-xl text-chinese-gold mb-3">红军渡</h3>
+                    <p>苍溪红军渡是红四方面军长征出发地之一，1935年，数万红军由此强渡嘉陵江，踏上长征路，谱写了一曲曲英雄壮歌。</p>
+                </div>
+                <div class="bg-gradient-to-b from-ink-green/30 to-chinese-black p-6 rounded-lg shadow-lg transform transition-transform hover:-translate-y-2 duration-300">
+                    <img src="images/中.png" alt="苍溪红色文化" class="w-full h-48 object-cover rounded mb-4 border-2 border-chinese-gold/30">
+                    <h3 class="text-xl text-chinese-gold mb-3">红色精神</h3>
+                    <p>苍溪人民在革命年代形成了"智勇坚定、排难创新、团结奋斗、不胜不休"的红军精神，成为激励后人的宝贵财富。</p>
+                </div>
+                <div class="bg-gradient-to-b from-dark-purple/30 to-chinese-black p-6 rounded-lg shadow-lg transform transition-transform hover:-translate-y-2 duration-300">
+                    <img src="images/9cdda27e609565bc9bfecb86807a0fbb.png" alt="川剧与红色文化融合" class="w-full h-48 object-cover rounded mb-4 border-2 border-chinese-gold/30">
+                    <h3 class="text-xl text-chinese-gold mb-3">文化传承</h3>
+                    <p>如今，苍溪通过川剧等艺术形式，将红色故事代代相传，让年轻一代了解历史，传承红色基因，弘扬革命精神。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 文创产品 -->
+        <section id="products" class="mb-16">
+            <div class="text-center mb-12 scroll-reveal">
+                <h2 class="text-4xl font-kai font-bold text-chinese-gold mb-4">文创产品</h2>
+                <div class="w-32 h-1 bg-chinese-red mx-auto"></div>
+            </div>
+
+            <!-- 年轻人 -->
+            <div class="mb-16 scroll-reveal">
+                <h3 class="text-2xl font-kai text-chinese-gold mb-6 flex items-center">
+                    <i class="fa fa-heart mr-3"></i> 年轻人系列
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":1,"name":"徽章盲盒","price":39,"category":"年轻人"}'>
+                        <img src="images/11.png" alt="徽章盲盒" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">徽章盲盒</h4>
+                            <p class="mb-3">盲盒内含多款徽章，每款徽章设计融合川剧元素（如脸谱、戏服纹样）与红军渡元素（如渡船、红旗）</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">39</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":2,"name":"手机壳","price":19,"category":"年轻人"}'>
+                        <img src="images/22.png" alt="手机壳" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">手机壳</h4>
+                            <p class="mb-3">背面设计融合红军渡剪影与川剧脸谱元素，采用浮雕工艺让图案更具立体感，边缘微弧设计贴合手掌。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥19</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":3,"name":"冰箱贴","price":15,"category":"年轻人"}'>
+                        <img src="images/33.png" alt="冰箱贴" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">冰箱贴</h4>
+                            <p class="mb-3">正面以卡通化红军渡场景为图案，渡船上飘扬迷你红旗，色彩鲜活；反面印川剧经典角色脸谱，线条简洁生动。采用磁性强的软胶材质，不易刮伤冰箱表面，尺寸小巧不占空间。把红色记忆与川剧文化浓缩于方寸之间，让冰箱成为传递文化韵味的温馨角落。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥15</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":4,"name":"小夜灯","price":60,"category":"年轻人"}'>
+                        <img src="images/44.png" alt="小夜灯" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">小夜灯</h4>
+                            <p class="mb-3">“灯暖长夜・韵伴入眠”
+灯罩印有半透明川剧角色与红军渡剪影图案，开灯后光影透过灯罩形成温馨画面，底座为防滑设计，触控调节亮度。选用低功耗 LED 灯珠，节能环保且光线柔和不刺眼，尺寸小巧适合床头摆放。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥60</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":5,"name":"鼠标垫","price":22,"category":"年轻人"}'>
+                        <img src="images/55.png" alt="鼠标垫" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">鼠标垫</h4>
+                            <p class="mb-3">以川剧舞台与红军渡场景拼接为画面，色彩饱和度适中不刺眼，边缘锁边工艺防止脱线，底部防滑橡胶设计避免滑动。选用加厚记忆棉材质，手腕放置舒适，有效缓解使用疲劳。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥22</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":6,"name":"非遗传承手账本","price":15,"category":"年轻人"}'>
+                        <img src="images/66.png" alt="非遗传承手账本" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">非遗传承手账本</h4>
+                            <p class="mb-3">封面采用四川非遗蜀锦工艺，织有川剧脸谱与红军渡元素交织的纹样，内页选用护眼宣纸质感纸张，书写流畅不洇墨。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥15</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中年人 -->
+            <div class="mb-16 scroll-reveal">
+                <h3 class="text-2xl font-kai text-chinese-gold mb-6 flex items-center">
+                    <i class="fa fa-home mr-3"></i> 中年人系列
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":7,"name":"红渡萌挂·戏趣随身","price":29,"category":"中年人"}'>
+                        <img src="images/111.jpg" alt="红渡萌挂·戏趣随身" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">红渡萌挂·戏趣随身</h4>
+                            <p class="mb-3">以Q版川剧小旦与红军渡船为组合造型，小旦身着绣有五角星的简化戏服，脸颊带腮红显俏皮，渡船做迷你毛绒造型，与小旦手牵手相连，整体色彩明快柔和，选用超柔短绒面料，触感细腻亲肤，内置轻盈PP棉填充，不易变形；搭配可拆卸挂绳，方便挂在背包、钥匙串或车内。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥29</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":8,"name":"红渡领航·戏伴征途","price":35,"category":"中年人"}'>
+                        <img src="images/222.jpg" alt="红渡领航·戏伴征途" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">红渡领航·戏伴征途</h4>
+                            <p class="mb-3">主体采用红军渡船的迷你仿真造型，船身侧面雕刻川剧脸谱的简化线条，船头镶嵌红色珐琅五角星，搭配可旋转的川剧翎子装饰件，行驶中随气流轻动增添灵动性。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥35</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":9,"name":"红渡凝章·戏立山河","price":59,"category":"中年人"}'>
+                        <img src="images/333.jpg" alt="红渡凝章·戏立山河" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">红渡凝章·戏立山河</h4>
+                            <p class="mb-3">采用分层雕塑工艺，底层还原红军渡渡口的微缩场景，包含栈桥、渡船与远山剪影；上层伫立川剧武生人偶造型，服饰以红军红为主色调，翎子采用金属拉丝材质，眉眼雕刻精细，与底层场景形成“历史与艺术交融”的立体画面。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥59</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":10,"name":"渡川戏境·稳承视界","price":29,"category":"中年人"}'>
+                        <img src="images/444.jpg" alt="渡川戏境·稳承视界" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">渡川戏境·稳承视界</h4>
+                            <p class="mb-3">选用防滑ABS材质，支架面板印刷红军渡与川剧戏台的融合插画，可折叠调节角度，适配横竖屏使用。兼顾实用性与文化美学，日常追剧、视频通话时，让桌面充满红色国潮氛围。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥29</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":11,"name":"「脸谱·武生」国潮金属挂件","price":19,"category":"中年人"}'>
+                        <img src="images/555.jpg" alt="「脸谱·武生」国潮金属挂件" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">「脸谱·武生」国潮金属挂件</h4>
+                            <p class="mb-3">以京剧武生脸谱为原型，红黑主色调搭配金色线条，精准呈现戏曲角色的刚劲气质；金属材质+珐琅上色工艺，色泽饱满且不易褪色。配备金属钥匙圈与可定制铭牌，既是钥匙挂件，也可作为包挂装饰</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥19</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":12,"name":"军渡脸谱 紫砂储香","price":149,"category":"中年人"}'>
+                        <img src="images/666.jpg" alt="军渡脸谱 紫砂储香" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">军渡脸谱 紫砂储香</h4>
+                            <p class="mb-3">紫砂茶叶罐，罐身塑苍溪红军渡渡口石阶的肌理，罐盖饰简化川剧丑角脸谱纹样。紫砂透气性适配存茶，石阶肌理显质朴厚重，脸谱纹样藏川剧的诙谐意趣，罐型小巧易收纳，既满足中年人储茶的实用需求，又以“军渡肌理+脸谱罐盖”的设计，让红色文化与川剧烟火气融于茶事日常。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥149</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 老年人 -->
+            <div class="scroll-reveal">
+                <h3 class="text-2xl font-kai text-chinese-gold mb-6 flex items-center">
+                    <i class="fa fa-book mr-3"></i> 老年人系列
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":13,"name":"非遗布艺·双韵摆件","price":109,"category":"老年人"}'>
+                        <img src="images/1.jpg" alt="非遗布艺·双韵摆件" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">非遗布艺·双韵摆件</h4>
+                            <p class="mb-3">采用四川传统布艺工艺，制作双面绣摆件。正面绣红军渡核心场景（如塔子山渡口、战地医院遗址），配色庄重；反面绣川剧经典元素（如《逼侄赴科》中的折扇、《秋江》中的船桨），针法灵动。摆件底座刻有“苍溪红韵·川剧雅韵”字样。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥109</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":14,"name":"双韵保温茶杯","price":89,"category":"老年人"}'>
+                        <img src="images/2.jpg" alt="双韵保温茶杯" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">双韵保温茶杯</h4>
+                            <p class="mb-3">杯身采用陶瓷材质，外杯壁分两面印刷：一面绘红军渡渡口全景，用暗红、深灰配色；另一面绘川剧《白蛇传》中“断桥”场景，用浅蓝、米白配色，两面衔接处印“苍溪红军渡”“川剧非遗”字样。杯盖顶部饰川剧“帽翅”造型的硅胶提手。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥89</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":15,"name":"主题帆布包","price":59,"category":"老年人"}'>
+                        <img src="images/3.jpg" alt="主题帆布包" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">主题帆布包</h4>
+                            <p class="mb-3">帆布包采用军绿色主色调，正面印“苍溪红军渡”与川剧脸谱的组合图案，图案下方用加粗字体印“传承红色记忆，品味川剧韵味”；背面印红军渡经典诗句（如“嘉陵江上英雄渡”），字体为隶书，清晰易认。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥59</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":16,"name":"红军川剧元素靠枕套","price":69,"category":"老年人"}'>
+                        <img src="images/4.jpg" alt="红军川剧元素靠枕套" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">红军川剧元素靠枕套</h4>
+                            <p class="mb-3">纯棉斜纹面料，双面印花，含隐形拉链。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥69</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":17,"name":双韵文化钥匙包","price":29,"category":"老年人"}'>
+                        <img src="images/5.jpg" alt="双韵文化钥匙包" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">双韵文化钥匙包</h4>
+                            <p class="mb-3">PU皮质，多卡位设计，金属拉链头印主题图案。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥29</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-chinese-black border border-chinese-gold/30 rounded-lg overflow-hidden hover:border-chinese-gold transition-colors duration-300" data-product='{"id":18,"name":"布艺挂毯","price":79,"category":"老年人"}'>
+                        <img src="images/6.jpg" alt="布艺挂毯" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h4 class="text-lg text-chinese-gold mb-2">布艺挂毯</h4>
+                            <p class="mb-3">棉麻材质，红军渡全景与川剧《八阵图》场景拼接图案，流苏边缘。</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-chinese-gold font-bold">¥79</span>
+                                <button class="add-to-cart-btn bg-transparent border border-chinese-gold text-chinese-gold px-3 py-1 rounded-md">
+                                    <i class="fa fa-shopping-cart mr-1"></i> 加入购物车
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-chinese-black border-t border-chinese-gold/30 py-10">
+        <div class="container mx-auto px-4">
+            <div class="text-center">
+                <h3 class="text-2xl font-kai text-chinese-gold mb-4">川韵渡红魂</h3>
+                <p class="mb-6">传承川剧艺术，弘扬苍溪红色文化</p>
+                <div class="flex justify-center space-x-6 mb-8">
+                    <a href="#" class="text-white hover:text-chinese-gold transition-colors duration-300 text-xl"><i class="fa fa-weixin"></i></a>
+                    <a href="#" class="text-white hover:text-chinese-gold transition-colors duration-300 text-xl"><i class="fa fa-weibo"></i></a>
+                    <a href="#" class="text-white hover:text-chinese-gold transition-colors duration-300 text-xl"><i class="fa fa-instagram"></i></a>
+                    <a href="#" class="text-white hover:text-chinese-gold transition-colors duration-300 text-xl"><i class="fa fa-youtube-play"></i></a>
+                </div>
+                <p class="text-white/60 text-sm">© 2025 川韵渡红魂 - 川剧与苍溪红色文化宣传</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 购物车数据
+        let cart = JSON.parse(localStorage.getItem('chuanjuCart')) || [];
+        
+        // DOM元素
+        const body = document.getElementById('body');
+        const cartBtn = document.getElementById('cart-btn');
+        const closeCart = document.getElementById('close-cart');
+        const cartOverlay = document.getElementById('cart-overlay');
+        const cartItems = document.getElementById('cart-items');
+        const cartCount = document.getElementById('cart-count');
+        const cartTotal = document.getElementById('cart-total');
+        const cartEmpty = document.getElementById('cart-empty');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const checkoutModal = document.getElementById('checkout-modal');
+        const cancelCheckout = document.getElementById('cancel-checkout');
+        const confirmCheckout = document.getElementById('confirm-checkout');
+        const orderSummary = document.getElementById('order-summary');
+        const orderTotal = document.getElementById('order-total');
+        
+        // 初始化购物车
+        updateCart();
+        
+        // 打开购物车
+        cartBtn.addEventListener('click', () => {
+            body.classList.add('cart-open');
+        });
+        
+        // 关闭购物车
+        function closeCartSidebar() {
+            body.classList.remove('cart-open');
+        }
+        
+        closeCart.addEventListener('click', closeCartSidebar);
+        cartOverlay.addEventListener('click', closeCartSidebar);
+        
+        // 添加到购物车
+        document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const productEl = this.closest('[data-product]');
+                const product = JSON.parse(productEl.dataset.product);
+                
+                // 检查商品是否已在购物车中
+                const existingItem = cart.find(item => item.id === product.id);
+                
+                if (existingItem) {
+                    existingItem.quantity++;
+                } else {
+                    cart.push({...product, quantity: 1});
+                }
+                
+                // 保存并更新购物车
+                saveCart();
+                updateCart();
+                
+                // 显示添加成功动画
+                this.innerHTML = '<i class="fa fa-check mr-1"></i> 已添加';
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fa fa-shopping-cart mr-1"></i> 加入购物车';
+                }, 1500);
+            });
+        });
+        
+        // 更新购物车显示
+        function updateCart() {
+            // 更新购物车数量
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // 更新购物车内容
+            if (cart.length === 0) {
+                cartItems.innerHTML = '';
+                cartEmpty.style.display = 'block';
+                cartTotal.textContent = '¥0.00';
+                checkoutBtn.disabled = true;
+                checkoutBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+            
+            cartEmpty.style.display = 'none';
+            checkoutBtn.disabled = false;
+            checkoutBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            // 生成购物车项目
+            cartItems.innerHTML = '';
+            cart.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'flex justify-between items-center pb-4 border-b border-chinese-gold/10';
+                itemEl.innerHTML = `
+                    <div>
+                        <h4 class="text-chinese-gold">${item.name}</h4>
+                        <p class="text-sm text-white/70">¥${item.price} × ${item.quantity}</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="text-white">¥${(item.price * item.quantity).toFixed(2)}</span>
+                        <div class="flex items-center gap-1">
+                            <button class="quantity-btn decrease" data-id="${item.id}">-</button>
+                            <button class="quantity-btn increase" data-id="${item.id}">+</button>
+                            <button class="quantity-btn remove" data-id="${item.id}"><i class="fa fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                cartItems.appendChild(itemEl);
+            });
+            
+            // 更新总价
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            cartTotal.textContent = `¥${total.toFixed(2)}`;
+        }
+        
+        // 购物车操作事件委托
+        cartItems.addEventListener('click', function(e) {
+            const id = parseInt(e.target.closest('[data-id]')?.dataset.id);
+            if (!id) return;
+            
+            const itemIndex = cart.findIndex(item => item.id === id);
+            if (itemIndex === -1) return;
+            
+            // 减少数量
+            if (e.target.closest('.decrease')) {
+                if (cart[itemIndex].quantity > 1) {
+                    cart[itemIndex].quantity--;
+                } else {
+                    cart.splice(itemIndex, 1);
+                }
+            }
+            
+            // 增加数量
+            if (e.target.closest('.increase')) {
+                cart[itemIndex].quantity++;
+            }
+            
+            // 删除商品
+            if (e.target.closest('.remove')) {
+                cart.splice(itemIndex, 1);
+            }
+            
+            saveCart();
+            updateCart();
+        });
+        
+        // 保存购物车到本地存储
+        function saveCart() {
+            localStorage.setItem('chuanjuCart', JSON.stringify(cart));
+        }
+        
+        // 打开结算弹窗
+        checkoutBtn.addEventListener('click', function() {
+            if (cart.length === 0) return;
+            
+            // 生成订单摘要
+            orderSummary.innerHTML = '';
+            cart.forEach(item => {
+                const summaryItem = document.createElement('div');
+                summaryItem.className = 'flex justify-between';
+                summaryItem.innerHTML = `
+                    <span>${item.name} × ${item.quantity}</span>
+                    <span>¥${(item.price * item.quantity).toFixed(2)}</span>
+                `;
+                orderSummary.appendChild(summaryItem);
+            });
+            
+            // 更新订单总价
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            orderTotal.textContent = `¥${total.toFixed(2)}`;
+            
+            // 显示弹窗
+            checkoutModal.classList.add('active');
+        });
+        
+        // 取消结算
+        cancelCheckout.addEventListener('click', function() {
+            checkoutModal.classList.remove('active');
+        });
+        
+        // 确认结算
+        confirmCheckout.addEventListener('click', function() {
+            alert('订单提交成功！感谢您对川剧与苍溪红色文化的支持！');
+            cart = [];
+            saveCart();
+            updateCart();
+            checkoutModal.classList.remove('active');
+            closeCartSidebar();
+        });
+
+        // 移动端菜单切换
+        document.getElementById('menu-toggle').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 帷幕拉开效果
+        document.getElementById('open-curtain').addEventListener('click', function() {
+            document.getElementById('curtain').classList.add('curtain-open');
+            setTimeout(() => {
+                window.scrollTo({
+                    top: window.innerHeight,
+                    behavior: 'smooth'
+                });
+            }, 1500);
+        });
+
+        // 卷轴展开效果
+        document.getElementById('scroll-trigger1').addEventListener('click', function() {
+            const content = document.getElementById('scroll-content1').parentElement;
+            content.classList.toggle('scroll-expanded');
+            this.querySelector('i').classList.toggle('rotate-180');
+        });
+        document.getElementById('scroll-trigger2').addEventListener('click', function() {
+            const content = document.getElementById('scroll-content2').parentElement;
+            content.classList.toggle('scroll-expanded');
+            this.querySelector('i').classList.toggle('rotate-180');
+        });
+
+        // 滚动触发动画
+        function checkScroll() {
+            const elements = document.querySelectorAll('.scroll-reveal');
+            elements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementVisible = 150;
+                if (elementTop < window.innerHeight - elementVisible) {
+                    element.classList.add('active');
+                }
+            });
+
+            // 导航栏滚动效果
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('bg-chinese-black/95', 'py-2', 'shadow-lg');
+                navbar.classList.remove('bg-chinese-black/80', 'py-3');
+            } else {
+                navbar.classList.add('bg-chinese-black/80', 'py-3');
+                navbar.classList.remove('bg-chinese-black/95', 'py-2', 'shadow-lg');
+            }
+        }
+
+        window.addEventListener('scroll', checkScroll);
+        checkScroll();
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
